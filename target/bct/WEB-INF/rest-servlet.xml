@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+	<!-- DJ 扫描，自动注入 bean -->
+	<context:component-scan base-package="com.xiaomishu.spring4rest.bayes" />
+	<!-- 扫描com及子包，自动实例化带@controller注释的实例, 由于实例化controller时会对controller关联的Service类一同实例化，所以这里需要排除@Service -->
+	<!-- <context:component-scan base-package="com"> <context:include-filter 
+		type="annotation" expression="org.springframework.stereotype.Controller"/> 
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/> 
+		</context:component-scan> -->
+	<mvc:annotation-driven />
+	<!-- 允许对静态资源文件的访问 -->
+	<!-- <mvc:default-servlet-handler /> -->
+	<mvc:default-servlet-handler />
+	<!-- 视图解释类 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" /><!--可为空,方便实现自已的依据扩展名来选择视图解释类的逻辑 -->
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+	</bean>
+
+	<mvc:annotation-driven content-negotiation-manager="contentManager" 
+		/> <bean id="contentManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"> 
+		<property name="favorPathExtension" value="true" /> <property name="ignoreAcceptHeader" 
+		value="true" /> <property name="defaultContentType" value="text/html" /> 
+		<property name="useJaf" value="false" /> <property name="mediaTypes"> <map> 
+		<entry key="json" value="application/json" /> <entry key="html" value="text/html" 
+		/> <entry key="xml" value="application/xml" /> </map> </property> </bean> 
+		<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
+		<property name="prefix" value="/WEB-INF/views/" /> <property name="suffix" 
+		value=".jsp" /> </bean>
+
+	<!-- 转换器配置:只有配置好了转换器才能进行类与JSON和XML的转换 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<!-- String 转换器 -->
+				<ref bean="stringHttpMessageConverter" />
+				<!-- JSON 转换器 -->
+				<ref bean="jsonHttpMessageConverter" />
+
+				<!-- XML 转换器 -->
+				<ref bean="marshallingHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+
+
+	<bean id="stringHttpMessageConverter"
+		class="org.springframework.http.converter.StringHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/plain;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="jsonHttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>application/json</value>
+			</list>
+
+		</property>
+	</bean>
+
+	<bean id="marshallingHttpMessageConverter"
+		class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+		<constructor-arg ref="jaxbMarshaller" />
+		<property name="supportedMediaTypes" value="application/xml" />
+	</bean>
+
+
+	<bean id="jaxbMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<!-- XML转换器需要绑定需要转换的类 -->
+		<property name="classesToBeBound">
+			<list>
+				<value>com.xiaomishu.spring4rest.bayes.model.User</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 总错误处理 -->
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="defaultErrorView">
+			<value>/WEB-INF/views/error</value>
+		</property>
+		<property name="defaultStatusCode">
+			<value>500</value>
+		</property>
+		<property name="warnLogCategory">
+			<value>org.springframework.web.servlet.handler.SimpleMappingExceptionResolver
+			</value>
+		</property>
+	</bean>
+
+</beans>
