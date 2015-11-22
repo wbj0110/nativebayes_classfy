@@ -1,10 +1,10 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : bayes_xiaomishu
+Source Server         : bayes_soledede
 Source Server Version : 50173
-Source Host           : 192.168.4.70:3306
-Source Database       : bayes_xiaomishu
+Source Host           : spark1.soledede.com:3306
+Source Database       : bayes_soledede
 
 Target Server Type    : MYSQL
 Target Server Version : 50173
